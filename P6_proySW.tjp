@@ -5,7 +5,7 @@
  * some elements of it
  */
 
-project pSix "Web Game"  2023-03-15 +4.5m {
+project pSix "Web Game"  2023-03-15 +2.5m {
   # Set the default time zone for the project. If not specified, UTC
   # is used.
   timezone "Europe/Paris"
@@ -19,7 +19,7 @@ project pSix "Web Game"  2023-03-15 +4.5m {
   # the project reports. If not specified, the current day will be
   # used, but this will likely be outside of the project range, so it
   # can't be seen in the reports.
-  now 2023-06-5-13:00
+  now 2023-05-11-13:00
   # The currency for all money values is the US Dollar.
   currency "EUR"
 
@@ -45,7 +45,7 @@ rate 145.2
 account cost "Project Cost" {
   account manag "Management"
   account wFront "Web Front-End"
-  account mFront "Mobile Front-End"
+  account mFront "Mobile Front-end"
   account back "Back-End"
 }
 account rev "Payments"
@@ -68,9 +68,11 @@ resource dev2 "Samantha Müller" {
 resource dev3 "Peter Green" {
   email "kkk@unizar.es"
 }
-resource dev4 "Fernando Lahoz Bernad" { # YO
-  email "800989@unizar.es"
+
+resource dev4 "Óscar Jaime" {
+  email "818961@unizar.es"
   rate 100
+  limits { dailymax 4h }
 }
 
 # Now we specify the work packages. The whole project is described as
@@ -109,7 +111,7 @@ task WMGame "Web & Mobile Game" {
     task tlogic "Game logic" {
       effort 12d
       actual:effort 11d
-      allocate dev4, dev2
+      allocate dev1, dev2
       depends WMGame.tback.tBEd
       journalentry 2023-03-28 "Game logic completed before deadline" {
         author boss
@@ -119,7 +121,7 @@ task WMGame "Web & Mobile Game" {
     }
     task tbackDev "Back development" {
       effort 20d
-      allocate dev4, dev2
+      allocate dev1, dev2
       depends WMGame.tback.tlogic
     }
   }
@@ -151,19 +153,63 @@ task WMGame "Web & Mobile Game" {
     }    
   }
 
+  task tmobF "Mobile Front End" {
+    purge chargeset
+    chargeset mFront
+    responsible dev4
+    depends WMGame.tback.tBEd
+    task tmGUId "Mobile GUI Design" {
+      effort 9d
+      actual:effort 15d
+      allocate dev1
+    }
+    task tmFEc "Mobile Front End Construction" {
+      effort 15d
+      allocate dev4
+      depends WMGame.tmobF.tmGUId
+      journalentry 2023-05-11 "Problem with Android Studio" {
+        author dev3
+        alert yellow
+        summary "Android Studio can't recognise calls to backend"
+      }
+    }
+    task tmFEt "Web Front End Test" {
+      effort 6d
+      allocate dev4
+      depends WMGame.tmobF.tmFEc
+    }
+  }
+
+  task tBackDepl "Back End Deployment" {
+    purge chargeset
+    chargeset back
+    responsible dev1
+    depends WMGame.tback
+    task cloudSel "Cloud Selection" {
+      effort 2d
+      allocate dev1
+    }
+    task cloudDepl "Cloud Deployment" {
+      effort 2d
+      allocate dev1
+      depends WMGame.tBackDepl.cloudSel
+    }
+
+  }
+
   task ttest "Acceptance tests" {
       effort 10d
       allocate boss
       allocate dev2
       actual:effort 15d
+      minstart 2023-06-01
       journalentry 2023-04-13 "Problems with the planned dates" {
         author boss
         alert red
-        summary "The whole team asiigned to this task has a trip to visit a new client from May 7th to May 12th. Needed to check if the project can be finished on time or it is necessary to reasign efforts."
+        summary "The whole team asigned to this task has a trip to visit a new client from May 7th to May 12th. Needed to check if the project can be finished on time or it is necessary to reasign efforts."
       }
       depends WMGame.twebF
       depends WMGame.tback
-      start 2023-06-01
   }
 
     
@@ -192,49 +238,6 @@ task WMGame "Web & Mobile Game" {
       charge 12000.0 onstart
     }
   }
-
-  task tmobF "Mobile Front End" {
-    purge chargeset
-    chargeset mFront
-    responsible dev3
-    depends WMGame.tback.tBEd
-    task tGUId "Mobile GUI Design" {
-      effort 10d
-      allocate dev3
-    }
-    task tFEc "Mobile Front End Construction" {
-      effort 20d # Con la experiencia de nuestro proyecto hay menos soporte en movil
-      allocate dev2, dev3
-      depends WMGame.tmobF.tGUId # Depende del diseño de la GUI
-    }
-    task tFEt "Mobile Front End Test" {
-      effort 6d
-      allocate dev1
-      depends WMGame.tmobF.tFEc # Depende del diseño de la implementación
-    }    
-  }
-
-  task tdeployB "Back End Deployment" {
-    purge chargeset
-    chargeset back
-    responsible dev4
-    depends WMGame.tback.tBEd
-    task tNETd "Network Design" {
-      effort 4d
-      allocate dev1
-    }
-    task tCONFc "Deployment Configuration" {
-      effort 6d
-      allocate dev4, dev1
-      depends WMGame.tdeployB.tNETd
-    }
-    task tFEt "Deployment Test" {
-      effort 5d
-      allocate dev4
-      depends WMGame.tdeployB.tCONFc
-    }    
-  }
-
 }
 
 # Now the project has been specified completely. Stopping here would
