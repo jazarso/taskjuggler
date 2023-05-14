@@ -1,11 +1,11 @@
 /*
- * This file contains the practice 6 source code corresponding with the
+ * This file contains the practice 6 source code corresponding with the 
  * project planification using TaskJuggler in the "Proyecto Software" course.
  * It is based on the Tutorial project offered by TaskJuggler and maintains 
  * some elements of it
  */
 
-project pSix "Web Game"  2023-03-15 +2m {
+project pSix "Web Game"  2023-03-15 +4.5m {
   # Set the default time zone for the project. If not specified, UTC
   # is used.
   timezone "Europe/Paris"
@@ -19,7 +19,7 @@ project pSix "Web Game"  2023-03-15 +2m {
   # the project reports. If not specified, the current day will be
   # used, but this will likely be outside of the project range, so it
   # can't be seen in the reports.
-  now 2023-04-15-13:00
+  now 2023-06-5-13:00
   # The currency for all money values is the US Dollar.
   currency "EUR"
 
@@ -45,6 +45,7 @@ rate 145.2
 account cost "Project Cost" {
   account manag "Management"
   account wFront "Web Front-End"
+  account mFront "Mobile Front-End"
   account back "Back-End"
 }
 account rev "Payments"
@@ -53,6 +54,7 @@ balance cost rev
 
 resource boss "Liz Bullock" {
   email "iiii@unizar.es"
+  actual:leaves project 2023-05-07 - 2023-05-12
   rate 160
 }
 resource dev1 "Paul Smith" {
@@ -61,9 +63,14 @@ resource dev1 "Paul Smith" {
 resource dev2 "Samantha Müller" {
   email "jjj@unizar.es"
   rate 100
+  actual:leaves project 2023-05-07 - 2023-05-12
 }
 resource dev3 "Peter Green" {
   email "kkk@unizar.es"
+}
+resource dev4 "Fernando Lahoz Bernad" { # YO
+  email "800989@unizar.es"
+  rate 100
 }
 
 # Now we specify the work packages. The whole project is described as
@@ -85,7 +92,7 @@ task WMGame "Web & Mobile Game" {
   task tgdesign "General System Design" {
       effort 2d
       allocate boss
-      depends !deliveries.start
+      depends WMGame.deliveries.start
   }
 
   task tback "Back End" {
@@ -93,7 +100,7 @@ task WMGame "Web & Mobile Game" {
     purge chargeset
     chargeset back
     responsible dev1
-    depends !tgdesign
+    depends WMGame.tgdesign
     task tBEd "Back End General Design" {
       # The effort to finish this task is 5 man-days.
       effort 5d
@@ -102,15 +109,18 @@ task WMGame "Web & Mobile Game" {
     task tlogic "Game logic" {
       effort 12d
       actual:effort 11d
-      allocate dev1, dev2
+      allocate dev4, dev2
+      depends WMGame.tback.tBEd
       journalentry 2023-03-28 "Game logic completed before deadline" {
         author boss
+        alert green
         summary "The team has ended the game logic before deadline."
       }
     }
     task tbackDev "Back development" {
       effort 20d
-      allocate dev1, dev2
+      allocate dev4, dev2
+      depends WMGame.tback.tlogic
     }
   }
 
@@ -118,28 +128,42 @@ task WMGame "Web & Mobile Game" {
     purge chargeset
     chargeset wFront
     responsible dev3
-    depends !tback.tBEd
+    depends WMGame.tback.tBEd
     task tGUId "Web GUI Design" {
       effort 9d
+      actual:effort 15d
       allocate dev3
+      journalentry 2023-04-11 "Problems with the GUI design tool" {
+        author dev3
+        alert yellow
+        summary "The tool used for the GUI design has given me a lot of problems. I recommend to look for other one."
+      }
     }
     task tFEc "Web Front End Construction" {
       effort 15d
       allocate dev2, dev3
+      depends WMGame.twebF.tGUId
     }
     task tFEt "Web Front End Test" {
       effort 6d
       allocate dev1
-      depends !tFEc
+      depends WMGame.twebF.tFEc
     }    
   }
 
-  task ttest "Accpetance tests" {
+  task ttest "Acceptance tests" {
       effort 10d
       allocate boss
       allocate dev2
-      depends !twebF
-      depends !tback
+      actual:effort 15d
+      journalentry 2023-04-13 "Problems with the planned dates" {
+        author boss
+        alert red
+        summary "The whole team asiigned to this task has a trip to visit a new client from May 7th to May 12th. Needed to check if the project can be finished on time or it is necessary to reasign efforts."
+      }
+      depends WMGame.twebF
+      depends WMGame.tback
+      start 2023-06-01
   }
 
     
@@ -164,10 +188,53 @@ task WMGame "Web & Mobile Game" {
     }
 
     task done "Ship Product to Customer" {
-      depends !!ttest
+      depends WMGame.ttest
       charge 12000.0 onstart
     }
   }
+
+  task tmobF "Mobile Front End" {
+    purge chargeset
+    chargeset mFront
+    responsible dev3
+    depends WMGame.tback.tBEd
+    task tGUId "Mobile GUI Design" {
+      effort 10d
+      allocate dev3
+    }
+    task tFEc "Mobile Front End Construction" {
+      effort 20d # Con la experiencia de nuestro proyecto hay menos soporte en movil
+      allocate dev2, dev3
+      depends WMGame.tmobF.tGUId # Depende del diseño de la GUI
+    }
+    task tFEt "Mobile Front End Test" {
+      effort 6d
+      allocate dev1
+      depends WMGame.tmobF.tFEc # Depende del diseño de la implementación
+    }    
+  }
+
+  task tdeployB "Back End Deployment" {
+    purge chargeset
+    chargeset back
+    responsible dev4
+    depends WMGame.tback.tBEd
+    task tNETd "Network Design" {
+      effort 4d
+      allocate dev1
+    }
+    task tCONFc "Deployment Configuration" {
+      effort 6d
+      allocate dev4, dev1
+      depends WMGame.tdeployB.tNETd
+    }
+    task tFEt "Deployment Test" {
+      effort 5d
+      allocate dev4
+      depends WMGame.tdeployB.tCONFc
+    }    
+  }
+
 }
 
 # Now the project has been specified completely. Stopping here would
