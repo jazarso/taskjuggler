@@ -282,7 +282,7 @@ textreport frame "" {
   
   textreport initP "Initial Plan" {
     formats html
-    center '<[report id="intPlan"]>'
+    center '<[report id="initPlan"]>'
   }
 
   textreport "Status" {
