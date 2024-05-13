@@ -312,7 +312,7 @@ textreport frame "" {
 
 # A traditional Gantt chart with a project overview.
 taskreport overview "" {
-  scenarios actual
+  scenarios plan
   headline "Current Project Plan"
   columns bsi { title 'WBS' },
           name, start, end, effort, cost,
