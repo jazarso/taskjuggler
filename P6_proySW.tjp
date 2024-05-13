@@ -280,7 +280,7 @@ textreport frame "" {
     center '<[report id="overview"]>'
   }
   
-  textreport overvi "Initial Plan" {
+  textreport initP "Initial Plan" {
     formats html
     center '<[report id="intPlan"]>'
   }
