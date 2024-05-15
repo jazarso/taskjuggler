@@ -5,7 +5,7 @@
  * some elements of it
  */
 
-project pSix "Web Game"  2024-03-15 +3m {
+project pSix "Web Game"  2023-03-15 +5m {
   # Set the default time zone for the project. If not specified, UTC
   # is used.
   timezone "Europe/Paris"
@@ -19,7 +19,7 @@ project pSix "Web Game"  2024-03-15 +3m {
   # the project reports. If not specified, the current day will be
   # used, but this will likely be outside of the project range, so it
   # can't be seen in the reports.
-  now 2024-04-15-13:00
+  now 2023-05-11-13:00
   # The currency for all money values is the US Dollar.
   currency "EUR"
 
@@ -30,7 +30,7 @@ project pSix "Web Game"  2024-03-15 +3m {
 }
 
 # This is not a real copyright for this file. It's just used as an example.
-copyright "Creative Commons 2024 Proyecto Software - Unizar."
+copyright "Creative Commons 2023 Proyecto Software - Unizar."
 
 # The daily default rate of all resources. This can be overridden for each
 # resource. We specify this, so that we can do a good calculation of
@@ -45,6 +45,7 @@ rate 145.2
 account cost "Project Cost" {
   account manag "Management"
   account wFront "Web Front-End"
+  account mFront "Mobile Front-end"
   account back "Back-End"
 }
 account rev "Payments"
@@ -53,7 +54,7 @@ balance cost rev
 
 resource boss "Liz Bullock" {
   email "iiii@unizar.es"
-  actual:leaves project 2024-05-07 - 2024-05-12
+  actual:leaves project 2023-05-07 - 2023-05-12
   rate 160
 }
 resource dev1 "Paul Smith" {
@@ -62,14 +63,16 @@ resource dev1 "Paul Smith" {
 resource dev2 "Samantha Müller" {
   email "jjj@unizar.es"
   rate 100
-  actual:leaves project 2024-05-07 - 2024-05-12
+  actual:leaves project 2023-05-07 - 2023-05-12
 }
 resource dev3 "Peter Green" {
   email "kkk@unizar.es"
 }
-resource dev4 "Andrés Yubero" {
-  email "842236@unizar.es"
-  workinghours mon-fri 8:00-12:00
+
+resource dev4 "Óscar Jaime" {
+  email "818961@unizar.es"
+  rate 100
+  limits { dailymax 4h }
 }
 
 # Now we specify the work packages. The whole project is described as
@@ -110,7 +113,7 @@ task WMGame "Web & Mobile Game" {
       actual:effort 11d
       allocate dev1, dev2
       depends WMGame.tback.tBEd
-      journalentry 2024-03-28 "Game logic completed before deadline" {
+      journalentry 2023-03-28 "Game logic completed before deadline" {
         author boss
         alert green
         summary "The team has ended the game logic before deadline."
@@ -131,8 +134,8 @@ task WMGame "Web & Mobile Game" {
     task tGUId "Web GUI Design" {
       effort 9d
       actual:effort 15d
-      allocate dev3, dev4
-      journalentry 2024-04-11 "Problems with the GUI design tool" {
+      allocate dev3
+      journalentry 2023-04-11 "Problems with the GUI design tool" {
         author dev3
         alert yellow
         summary "The tool used for the GUI design has given me a lot of problems. I recommend to look for other one."
@@ -140,7 +143,7 @@ task WMGame "Web & Mobile Game" {
     }
     task tFEc "Web Front End Construction" {
       effort 15d
-      allocate dev2, dev4
+      allocate dev2, dev3
       depends WMGame.twebF.tGUId
     }
     task tFEt "Web Front End Test" {
@@ -149,57 +152,58 @@ task WMGame "Web & Mobile Game" {
       depends WMGame.twebF.tFEc
     }    
   }
-  
-  task tMobileF "Mobile Frontend" {
+
+  task tmobF "Mobile Front End" {
     purge chargeset
-    chargeset wFront
-    responsible boss
+    chargeset mFront
+    responsible dev4
     depends WMGame.tback.tBEd
-    task tGUI "Mobile GUI Design" {
+    task tmGUId "Mobile GUI Design" {
       effort 9d
-      allocate dev3
+      actual:effort 15d
+      allocate dev1
     }
-    task tMobileFc "Mobile Frontend Construction" {
+    task tmFEc "Mobile Front End Construction" {
       effort 15d
-      allocate dev2, dev3
-      depends WMGame.tMobileF.tGUI
+      allocate dev4
+      depends WMGame.tmobF.tmGUId
+      journalentry 2023-05-11 "Problem with Android Studio" {
+        author dev3
+        alert yellow
+        summary "Android Studio can't recognise calls to backend"
+      }
     }
-    task tMobileFt "Mobile Frontend Test" {
+    task tmFEt "Web Front End Test" {
       effort 6d
-      allocate dev1
-      depends WMGame.tMobileF.tMobileFc
-    }  
-    journalentry 2024-05-10 "Anotación" {
-      author dev4
-      alert green
-      summary "Anotación que se pide en el punto 3"
-    }
-  }
-  
-  task tCloudSupport "Cloud Deployment Support" {
-    purge chargeset
-    chargeset back
-    responsible boss
-    depends WMGame.tback.tbackDev
-    task tCloudEval "Cloud Provider Evaluation" {
-      effort 5d
-      actual:effort 6d
-      allocate dev1
-    }
-    task tCloudDeploy "Cloud Deployment" {
-      effort 7d
-      allocate dev1
-      depends WMGame.tCloudSupport.tCloudEval
+      allocate dev4
+      depends WMGame.tmobF.tmFEc
     }
   }
 
+  task tBackDepl "Back End Deployment" {
+    purge chargeset
+    chargeset back
+    responsible dev1
+    depends WMGame.tback
+    task cloudSel "Cloud Selection" {
+      effort 2d
+      allocate dev1
+    }
+    task cloudDepl "Cloud Deployment" {
+      effort 2d
+      allocate dev1
+      depends WMGame.tBackDepl.cloudSel
+    }
+
+  }
+
   task ttest "Acceptance tests" {
-      start 2024-06-01
       effort 10d
       allocate boss
       allocate dev2
       actual:effort 15d
-      journalentry 2024-04-13 "Problems with the planned dates" {
+      minstart 2023-06-01
+      journalentry 2023-04-13 "Problems with the planned dates" {
         author boss
         alert red
         summary "The whole team asigned to this task has a trip to visit a new client from May 7th to May 12th. Needed to check if the project can be finished on time or it is necessary to reasign efforts."
@@ -275,10 +279,10 @@ textreport frame "" {
     formats html
     center '<[report id="overview"]>'
   }
-
-  textreport initialPlan "InitialPlan" {
+  
+  textreport initP "Initial Plan" {
     formats html
-    center '<[report id="overview"]>'
+    center '<[report id="initPlan"]>'
   }
 
   textreport "Status" {
@@ -315,6 +319,21 @@ textreport frame "" {
 taskreport overview "" {
   scenarios actual
   headline "Current Project Plan"
+  columns bsi { title 'WBS' },
+          name, start, end, effort, cost,
+          revenue, chart { ${TaskTip} }
+  # For this report we like to have the abbreviated weekday in front
+  # of the date. %a is the tag for this.
+  timeformat "%a %Y-%m-%d"
+  loadunit days
+  hideresource @all
+  balance cost rev
+  caption 'All effort values are in man days.'
+}
+
+taskreport initPlan "" {
+  scenarios plan
+  headline "Initial Project Plan"
   columns bsi { title 'WBS' },
           name, start, end, effort, cost,
           revenue, chart { ${TaskTip} }
