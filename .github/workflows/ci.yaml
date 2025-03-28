@@ -9,7 +9,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.2.3'
+          ruby-version: '2.7.0p0'
       - run: gem install taskjuggler
       - run: mkdir results
       - run: tj3 -o results P6_proySW.tjp
